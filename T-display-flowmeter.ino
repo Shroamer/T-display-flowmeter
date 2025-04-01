@@ -13,12 +13,12 @@
 #define ADC_POWER 14  // ???
 
 // Encoder pins
-#define EN_A 15   // encoder A input
-#define EN_B 13   // encoder B input
-#define EN_SW 12  // encoder switch input
+//#define EN_A 15   // encoder A input
+//#define EN_B 13   // encoder B input
+//#define EN_SW 12  // encoder switch input
 
 // Peripheral pins
-#define FSENS 27  // water flow sensor input pin
+#define FSENS 13  // water flow sensor input pin
 
 
 

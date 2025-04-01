@@ -8,7 +8,7 @@ void TFT_init() {
   pinMode(TFT_BL, OUTPUT);  // TTGO T-Display enable Backlight pin 4
   TFT_BackLight(1);         // T-Display turn on Backlight
   tft.init();               // eSPI variant
-  tft.setRotation(1);
+  tft.setRotation(3);
   tft.fillScreen(TFT_BLACK);
   // Create an 8-bit sprite 135×240 pixels (uses ~32KB of RAM)
   img.setColorDepth(8);

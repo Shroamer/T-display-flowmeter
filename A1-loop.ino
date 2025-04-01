@@ -7,7 +7,6 @@ void loop() {
     interrupts();              // Re-enable interrupts ASAP
 
     // Calculate pulses per minute based on *last* interval
-
     if (interval > 0) {
       pulsesPerMinute = 60000000.0 / interval;  // 60,000,000 us in a minute
       float mlPerMinute = pulsesPerMinute / pulsesPerMl;

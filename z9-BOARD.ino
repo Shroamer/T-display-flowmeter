@@ -11,10 +11,10 @@ https://homeding.github.io/boards/esp32/ttgo-t-display.htm
                    | I2C_SCL | 22  |4          21|  38*|         | 
                    |         | 17  |5          20|  39*| SVN     | 
                    |         | 2   |6          19|  32 |         | 
-              EN_A |         | 15  |7          18|  33 |         | 
-              EN_B | INT     | 13  |8          17|  25 | DAC1    |  
-             EN_SW |         | 12  |9          16|  26 | DAC2    |
-                   |         |[GND]|10         15|  27 |         | FSENS 
+                   |         | 15  |7          18|  33 |         | 
+             FSENS | INT     | 13  |8          17|  25 | DAC1    |  
+                   |         | 12  |9          16|  26 | DAC2    |
+                   |         |[GND]|10         15|  27 |         |
                    |         |[GND]|11         14|[GND]|         | 
                    |         |[3v3]|12         13|[5v0]|         | 
                                io0 |BTN _____ BTN| io35
