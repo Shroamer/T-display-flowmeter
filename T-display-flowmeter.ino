@@ -36,35 +36,70 @@
 //#define USER_SETUP_LOADED // defined in local User_Setup.h
 #include <TFT_eSPI.h>
 TFT_eSPI tft = TFT_eSPI();            //TFT_eSPI tft = TFT_eSPI(TFT_WIDTH, TFT_HEIGHT);
-TFT_eSprite img = TFT_eSprite(&tft);  // Create Sprite object "img" with pointer to "tft" object
-                                      // the pointer is used by pushSprite() to push it onto the TFT
+TFT_eSprite img = TFT_eSprite(&tft);  // Create Sprite object "img" with pointer to "tft" object the pointer is used by pushSprite() to push it onto the TFT
 
-// Sensor vars
-const float pulsesPerMl = 8.0; // how many pulse count in a liter of flow
-volatile unsigned long lastPulseTime = 0;
-volatile unsigned long pulseInterval = 0;
-volatile unsigned long totalPulses = 0;
-volatile unsigned long countPulses = 0;
-//volatile unsigned int lastPulseSpeed = 0; // pulses/min
-volatile float pulsesPerMinute = 0.0;
-volatile bool newDataAvailable = false;  // flag after each pulse read
+//    Sensor parameters
+const float pulPerMl = 8.15;                 // how many pulse count in a ml of flow (1000ml/1000 in fact)
+const float pulPerGal = pulPerMl * 3785.41;  // 3,785.41ml in galon
+//  💧  Sensor volatile vars
+volatile unsigned long lastPulseTime = 0;    // Time of latest pulse read
+volatile unsigned long pulseInterval = 0;    // Calculated interval between last pulses
+volatile unsigned long totalPulses = 0;      // total pulses counter (increments by sensor ISR)
+volatile unsigned long countPulses = 0;      // User counter shift. How many total counter to skip to count user's counter.
+volatile bool newSensorData = false;         // flag after each pulse read
+float maxPulsePerMinute = 1500 * pulPerMl;  //1500 ml/min * pulPerMl to get max pulses per minute for 1.5L/min pump
 
-// ISR for each sensor pulse
+
+
+
+//  🪣  buffered data
+unsigned long interval = 0;  // to store imported sample value
+unsigned long pulses = 0;    // to store imported sample value
+//volatile unsigned long totalPulsesBuf = 0;
+//volatile unsigned long countPulses = 0;
+
+volatile unsigned long pulsesPerMinute = 0.0;  // store calculated value
+
+// ⏰ Buffering timer setup (how often to calculate and log sample)
+unsigned long lastPulseCount = 0;            // last accounted pulse number. All later pulses are to be accounted. Increments inside timer ISR
+hw_timer_t *timer = NULL;                    // Timer handle
+unsigned long bufferLengthUs = 500000;       // Alarm time in uS value (500000 - 0.5sec). Chunk of time we will calculate values for.
+volatile unsigned long pulsesToAccount = 0;  // specify how many pulses were accounted. Basically, totalPulses index to determine how many pulses to account in buffer process
+volatile float pulsesPerMinuteBufAvg = 0;    // Here we keep average flow speed in pul/min for last buffer processed
+volatile bool newBufferData = false;         // flag rises in buffer timer ISR to indicate we have new buffer to account to (display and/or store)
+
+// ⏰ buffering ISR   Returns pul/min of unaccounted pulses into pulsesPerMinuteBufAvg; updates lastPulseCount.
+void IRAM_ATTR onTimer() {
+  unsigned long pulsesTemp;  // to store value of how many pulses we accounting for in case we have another pulse during this routine
+  {
+    noInterrupts();            // Critical: Disable interrupts while retrieving volatile data
+    pulsesTemp = totalPulses;  // assign value of how many pulses we accounting for in case we have another pulse during this routine
+    interrupts();              // Re-enable interrupts ASAP
+  }
+  unsigned long unaccountedPulses = pulsesTemp - lastPulseCount;  // lets determine how many pulses added since latest buffer processing
+  float buffersInMinuteUs = 1000000.0 / bufferLengthUs;           // how many buffers fits in minute (1000000uS). could be fraction.
+  pulsesPerMinuteBufAvg = unaccountedPulses * buffersInMinuteUs;  // average pul/min of buffer
+  lastPulseCount = pulsesTemp;                                    // setting up last unaccounted pulse to current, as we ccounted all of them right now.
+  newBufferData = 1;                                              // rising flag to process data further
+}
+
+//  〽️  ISR for each sensor pulse
+//do i still need unbuffered calculations now when i have a buffer?
+//Why i need to know single pulse length while dealing with buffer?
+//Maybe i could just increment totalPulses here?
 void IRAM_ATTR pulseISR() {
-  unsigned long currentTime = micros();
-  unsigned long currentInterval = currentTime - lastPulseTime;
-
-  // Debounce: Ignore very short intervals (e.g., < 1ms) to filter noise
-  //if (currentInterval > 1000) {
+  unsigned long currentTime = micros();                         // take current time sample
+  unsigned long currentInterval = currentTime - lastPulseTime;  // calculate how many time passed since last pulse
+  //if (currentInterval > 1000) {   // Debounce: Ignore very short intervals (e.g., < 1ms) to filter noise
   pulseInterval = currentInterval;  // Store for calculation
-  lastPulseTime = currentTime;
-  totalPulses++;
-  newDataAvailable = true;  // Set flag for new data
+  lastPulseTime = currentTime;      // storing last pulse time to calculate length to nex one coming
+  totalPulses++;                    // increment total pulses with each pulse
+  newSensorData = true;             // Set flag for new data
   //}
 }
 
-// ISR for pressing BUTTON1 (GPIO35)
+//  🔘  ISR for pressing BUTTON1 (GPIO35)
 void IRAM_ATTR button1ISR() {
   countPulses = totalPulses;  // Set flag when button is released
-  newDataAvailable = true;  // Set flag for new data
+  newSensorData = true;       // Set flag for new data
 }

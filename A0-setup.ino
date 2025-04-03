@@ -7,6 +7,7 @@ void setup() {
   attachInterrupt(BUTTON1, button1ISR, RISING);  // Trigger on release
   TFT_welcome();
   delay(200);
-  newDataAvailable = true;  // initialize display mode
-  pulseInterval = 1; // we need nonzero value to pass to calculation
+  initTimer(bufferLengthUs);     // timer set to uS value (500000 - 0.5sec)
+  newSensorData = true;  // initialize display mode
+  pulseInterval = 1;     // we need nonzero value to pass to calculation
 }
