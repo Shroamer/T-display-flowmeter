@@ -17,7 +17,7 @@ void pageMain() {
   img.setCursor(138, 55);
   img.print("total");
   //      DRAWING current flow value
-  float displayLitersPerMinute = (pulsesPerMinuteBufAvg / (pulPerMl));  // calculating LpM from PpM and PpMl of the sensor
+  float displayLitersPerMinute = (pulsesPerMinuteBufAvg / (pulPerMl*1000));  // calculating LpM from PpM and PpMl of the sensor
   if (displayLitersPerMinute >= 10) img.setTextFont(4);
   else img.setTextFont(7);  //7
   img.setTextSize(1);

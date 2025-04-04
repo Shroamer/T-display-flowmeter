@@ -77,7 +77,7 @@ void IRAM_ATTR onTimer() {
     interrupts();              // Re-enable interrupts ASAP
   }
   unsigned long unaccountedPulses = pulsesTemp - lastPulseCount;  // lets determine how many pulses added since latest buffer processing
-  float buffersInMinuteUs = 1000000.0 / bufferLengthUs;           // how many buffers fits in minute (1000000uS). could be fraction.
+  float buffersInMinuteUs = 60000000.0 / bufferLengthUs;           // how many buffers fits in minute (1000000uS). could be fraction.
   pulsesPerMinuteBufAvg = unaccountedPulses * buffersInMinuteUs;  // average pul/min of buffer
   lastPulseCount = pulsesTemp;                                    // setting up last unaccounted pulse to current, as we ccounted all of them right now.
   newBufferData = 1;                                              // rising flag to process data further
