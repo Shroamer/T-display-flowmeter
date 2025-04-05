@@ -12,6 +12,11 @@
 #define BUTTON2 0     //
 #define ADC_POWER 14  // ???
 
+#define BUTTON1_MASK (1 << (BUTTON1 - 32))  // mask raw register for button1 read
+#define BUTTON2_MASK (1 << BUTTON2)         // mask raw register for button1 read
+
+
+
 // Encoder pins
 //#define EN_A 15   // encoder A input
 //#define EN_B 13   // encoder B input
@@ -39,26 +44,26 @@ TFT_eSPI tft = TFT_eSPI();            //TFT_eSPI tft = TFT_eSPI(TFT_WIDTH, TFT_H
 TFT_eSprite img = TFT_eSprite(&tft);  // Create Sprite object "img" with pointer to "tft" object the pointer is used by pushSprite() to push it onto the TFT
 
 //    Sensor parameters
-const float pulPerMl = 8.15;                 // how many pulse count in a ml of flow (1000ml/1000 in fact)
+const float pulPerMl = 8.254;                // how many pulse count in a ml of flow (1000ml/1000 in fact)
 const float pulPerGal = pulPerMl * 3785.41;  // 3,785.41ml in galon
 //  💧  Sensor volatile vars
-volatile unsigned long lastPulseTime = 0;    // Time of latest pulse read
-volatile unsigned long pulseInterval = 0;    // Calculated interval between last pulses
-volatile unsigned long totalPulses = 0;      // total pulses counter (increments by sensor ISR)
-volatile unsigned long countPulses = 0;      // User counter shift. How many total counter to skip to count user's counter.
-volatile bool newSensorData = false;         // flag after each pulse read
+//volatile unsigned long lastPulseTime = 0;    // Time of latest pulse read
+//volatile unsigned long pulseInterval = 0;    // Calculated interval between last pulses
+volatile unsigned long totalPulses = 0;     // total pulses counter (increments by sensor ISR)
+volatile unsigned long countPulses = 0;     // User counter shift. How many total counter to skip to count user's counter.
+volatile bool newSensorData = false;        // flag after each pulse read
 float maxPulsePerMinute = 1500 * pulPerMl;  //1500 ml/min * pulPerMl to get max pulses per minute for 1.5L/min pump
 
 
 
 
 //  🪣  buffered data
-unsigned long interval = 0;  // to store imported sample value
-unsigned long pulses = 0;    // to store imported sample value
+//unsigned long interval = 0;  // to store imported sample value
+//unsigned long pulses = 0;    // to store imported sample value
 //volatile unsigned long totalPulsesBuf = 0;
 //volatile unsigned long countPulses = 0;
 
-volatile unsigned long pulsesPerMinute = 0.0;  // store calculated value
+//volatile unsigned long pulsesPerMinute = 0.0;  // store calculated value
 
 // ⏰ Buffering timer setup (how often to calculate and log sample)
 unsigned long lastPulseCount = 0;            // last accounted pulse number. All later pulses are to be accounted. Increments inside timer ISR
@@ -77,7 +82,7 @@ void IRAM_ATTR onTimer() {
     interrupts();              // Re-enable interrupts ASAP
   }
   unsigned long unaccountedPulses = pulsesTemp - lastPulseCount;  // lets determine how many pulses added since latest buffer processing
-  float buffersInMinuteUs = 60000000.0 / bufferLengthUs;           // how many buffers fits in minute (1000000uS). could be fraction.
+  float buffersInMinuteUs = 60000000.0 / bufferLengthUs;          // how many buffers fits in minute (60`000`000 uS). could be fraction.
   pulsesPerMinuteBufAvg = unaccountedPulses * buffersInMinuteUs;  // average pul/min of buffer
   lastPulseCount = pulsesTemp;                                    // setting up last unaccounted pulse to current, as we ccounted all of them right now.
   newBufferData = 1;                                              // rising flag to process data further
@@ -88,18 +93,41 @@ void IRAM_ATTR onTimer() {
 //Why i need to know single pulse length while dealing with buffer?
 //Maybe i could just increment totalPulses here?
 void IRAM_ATTR pulseISR() {
-  unsigned long currentTime = micros();                         // take current time sample
-  unsigned long currentInterval = currentTime - lastPulseTime;  // calculate how many time passed since last pulse
+  //unsigned long currentTime = micros();                         // take current time sample
+  //unsigned long currentInterval = currentTime - lastPulseTime;  // calculate how many time passed since last pulse
   //if (currentInterval > 1000) {   // Debounce: Ignore very short intervals (e.g., < 1ms) to filter noise
-  pulseInterval = currentInterval;  // Store for calculation
-  lastPulseTime = currentTime;      // storing last pulse time to calculate length to nex one coming
-  totalPulses++;                    // increment total pulses with each pulse
-  newSensorData = true;             // Set flag for new data
+  //pulseInterval = currentInterval;  // Store for calculation
+  //lastPulseTime = currentTime;      // storing last pulse time to calculate length to nex one coming
+  totalPulses++;         // increment total pulses with each pulse
+  newSensorData = true;  // Set flag for new data
   //}
 }
 
 //  🔘  ISR for pressing BUTTON1 (GPIO35)
+#define DEBOUNCE_TIME_US 50000                 // 50 ms debounce threshold (in microseconds)
+#define LONG_PRESS_THRESHOLD_US 500000         // 0.5 second threshold for a long press
+volatile int8_t b1_pressStatus = 0;            // 0 - unpressed; 1 - short-pressed; 2 - long pressed
+volatile int64_t b1_pressStartTime = 0;        // store timestamp
+volatile int64_t b1_lastButtonChangeTime = 0;  // store how long button was pressed
+
 void IRAM_ATTR button1ISR() {
-  countPulses = totalPulses;  // Set flag when button is released
-  newSensorData = true;       // Set flag for new data
+  //Serial.print("bISR:");
+  int64_t now = esp_timer_get_time();                              // store isr call timestamp
+  if ((now - b1_lastButtonChangeTime) < DEBOUNCE_TIME_US) return;  // Debounce: Ignore any changes that occur faster than DEBOUNCE_TIME_US.
+  b1_lastButtonChangeTime = now;
+
+  bool pressed = isButtonPressedRaw(BUTTON1);  // Use the raw port read to get the current button state, but inverse, as button wiring returns 1 when released and 0 when pressed
+  if (pressed) {                               // Button has just been pressed: record the timestamp.
+    b1_pressStartTime = now;
+    b1_pressStatus = 0;
+    //Serial.println("+");
+  } else {  // Button released: measure the duration of the press.
+    //Serial.println("-");
+    int64_t duration = now - b1_pressStartTime;
+    if (duration >= LONG_PRESS_THRESHOLD_US) {
+      b1_pressStatus = 2;  // Long press detected.
+    } else {
+      b1_pressStatus = 1;  // Short press detected.
+    }
+  }
 }

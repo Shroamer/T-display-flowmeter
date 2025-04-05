@@ -1,29 +1,28 @@
 void pageMain() {
+  
   //      DRAWING analog meter arc (0 is down, increments CW)
-  int valueAngle = map(pulsesPerMinuteBufAvg, 0, maxPulsePerMinute, 90, 180);  //mapping current value pul/min within min/max sensor values into min/max angle values
-  if (valueAngle < 180)
-    img.drawArc(135, 135, 135, 125, valueAngle, 180, TFT_NAVY, TFT_BLACK);  // draw passive part of the arc
-  if (valueAngle > 0)
-    img.drawArc(135, 135, 135, 125, 90, valueAngle, TFT_YELLOW, TFT_BLACK);  //draw active part
+  int valueAngle = map(pulsesPerMinuteBufAvg, 0, maxPulsePerMinute, 90, 180);  // mapping current value pul/min within min/max sensor values into min/max angle values
+  uint32_t analogColor = TFT_CYAN;                                             // Store active analog line color for overflow case
+  if (pulsesPerMinuteBufAvg > maxPulsePerMinute) {                             // pin-top value and change analog color if we have sensor overflow
+    analogColor = TFT_RED;                                                     // change color if overflowed
+    valueAngle = 180;                                                          // and set value to maimum possible
+  }
+  if (valueAngle < 180)                                                       // draw passive only if needed
+    img.drawArc(135, 135, 135, 125, valueAngle, 180, TFT_NAVY, TFT_BLACK);    // draw passive part of the arc
+  if (valueAngle > 0)                                                         // draw active only if needed
+    img.drawArc(135, 135, 135, 125, 90, valueAngle, analogColor, TFT_BLACK);  // draw active part
 
-  img.drawFloat(pulsesPerMinuteBufAvg, 3, 138, 5);  //debug purpose
-  img.setCursor(138, 15);
-  img.print("PpM");
-  img.drawFloat(maxPulsePerMinute, 3, 138, 25);
-  img.setCursor(138, 35);
-  img.print("PpM max");
-  img.setCursor(138, 45);
-  img.print(totalPulses);
-  img.setCursor(138, 55);
-  img.print("total");
   //      DRAWING current flow value
-  float displayLitersPerMinute = (pulsesPerMinuteBufAvg / (pulPerMl*1000));  // calculating LpM from PpM and PpMl of the sensor
-  if (displayLitersPerMinute >= 10) img.setTextFont(4);
-  else img.setTextFont(7);  //7
+  float displayLitersPerMinute = (pulsesPerMinuteBufAvg / (pulPerMl * 1000));  // calculating LpM from PpM and PpMl of the sensor
+  img.setTextFont(7);                                                          // 7
   img.setTextSize(1);
   //img.setCursor(20, 80);
   img.setTextDatum(TR_DATUM);  // Right alignment
   img.setTextColor(TFT_YELLOW);
+  uint8_t valDecimals = 3;
+  if (displayLitersPerMinute >= 1000) valDecimals = 0;
+  else if (displayLitersPerMinute >= 100) valDecimals = 1;
+  else if (displayLitersPerMinute >= 10) valDecimals = 2;
   img.drawFloat(displayLitersPerMinute, 3, 136, 85);  // (value, decimal places, x, y)
 
   //      DRAWING current flow title
@@ -38,7 +37,7 @@ void pageMain() {
   img.setTextSize(1);
   img.setTextColor(TFT_CYAN);
   float countLiters = (float)(totalPulses - countPulses) / (pulPerMl * 1000.0);  // calculates how many liters we accounted for user counter
-  uint8_t valDecimals = 3;
+  valDecimals = 3;
   if (countLiters > 1000) valDecimals = 0;
   else if (countLiters > 100) valDecimals = 1;
   else if (countLiters > 10) valDecimals = 2;
