@@ -18,5 +18,5 @@ inline bool isButtonPressedRaw(uint8_t pin) {
 void button_init() {
   pinMode(BUTTON1, INPUT_PULLUP);                                       // PULLUP - External pull-up required
   attachInterrupt(digitalPinToInterrupt(BUTTON1), button1ISR, CHANGE);  // Trigger on release
-  initTimer(bufferLengthUs);                                            // timer set to uS value (500000 - 0.5sec)
+  initTimer(bufferLengthUs);                                            // batch_timer set to uS value (500000 - 0.5sec)
 }

@@ -65,16 +65,16 @@ float maxPulsePerMinute = 1500 * pulPerMl;  //1500 ml/min * pulPerMl to get max 
 
 //volatile unsigned long pulsesPerMinute = 0.0;  // store calculated value
 
-// ⏰ Buffering timer setup (how often to calculate and log sample)
-unsigned long lastPulseCount = 0;            // last accounted pulse number. All later pulses are to be accounted. Increments inside timer ISR
-hw_timer_t *timer = NULL;                    // Timer handle
+// ⏰ batch_timer setup (how often to calculate and log sample)
+unsigned long lastPulseCount = 0;            // last accounted pulse number. All later pulses are to be accounted. Increments inside batch_timer ISR
+hw_timer_t *batch_timer = NULL;              // Timer handle
 unsigned long bufferLengthUs = 500000;       // Alarm time in uS value (500000 - 0.5sec). Chunk of time we will calculate values for.
 volatile unsigned long pulsesToAccount = 0;  // specify how many pulses were accounted. Basically, totalPulses index to determine how many pulses to account in buffer process
 volatile float pulsesPerMinuteBufAvg = 0;    // Here we keep average flow speed in pul/min for last buffer processed
-volatile bool newBufferData = false;         // flag rises in buffer timer ISR to indicate we have new buffer to account to (display and/or store)
+volatile bool newBufferData = false;         // flag rises in batch_timer ISR to indicate we have new buffer to account to (display and/or store)
 
-// ⏰ buffering ISR   Returns pul/min of unaccounted pulses into pulsesPerMinuteBufAvg; updates lastPulseCount.
-void IRAM_ATTR onTimer() {
+// ⏰ batch_timer ISR   Returns pul/min of unaccounted pulses into pulsesPerMinuteBufAvg; updates lastPulseCount.
+void IRAM_ATTR batchTimer() {
   unsigned long pulsesTemp;  // to store value of how many pulses we accounting for in case we have another pulse during this routine
   {
     noInterrupts();            // Critical: Disable interrupts while retrieving volatile data
@@ -87,6 +87,34 @@ void IRAM_ATTR onTimer() {
   lastPulseCount = pulsesTemp;                                    // setting up last unaccounted pulse to current, as we ccounted all of them right now.
   newBufferData = 1;                                              // rising flag to process data further
 }
+
+// logger variables
+float logArray[240] = { NAN };                                      // here we'll store our logged values, initialize array with not-a-number values.
+const int logArrayLength = sizeof(logArray) / sizeof(logArray[0]);  // how many items we have in log array
+int16_t logArrayIndex = logArrayLength - 1;                         // index of last stored to log value. it is the last one, so we can start writing to 0. This way we can pull values circularly and know when the sequence starts. Just because i think shifting whole array each time will be extra resourse consuming. (i'm not a programmer)
+
+// log_timer setup
+unsigned long lastLogCount = 0;             // last accounted in log pulse number. All later pulses are to be accounted for next log entry. Increments inside log_timer ISR
+hw_timer_t *log_timer = NULL;               // Timer handle
+unsigned long logSampleLengthUs = 1000000;  // log sample length in uS value (1000000 - 1sec). Also a timer alarm. Each log entry will be for that chunk length.
+volatile float pulsesPerMinuteLogAvg = 0;   // Here we store average flow speed in pul/min for last log sample processed
+volatile bool newLogData = false;           // flag rises in log_timer ISR to indicate we have new log item to account to
+
+// ⏰ log_timer ISR here we about to calculate average pul/min of last log period and iterate lastLogCount index.
+void IRAM_ATTR logTimer() {
+  unsigned long pulsesTemp;  // to store value of how many pulses we accounting for in case we have another pulse during this routine
+  {
+    noInterrupts();            // Critical: Disable interrupts while retrieving volatile data
+    pulsesTemp = totalPulses;  // assign value of how many pulses we accounting for in case we have another pulse during this routine
+    interrupts();              // Re-enable interrupts ASAP
+  }
+  unsigned long unaccountedPulses = pulsesTemp - lastLogCount;  // lets determine how many pulses added since latest log sampling
+  float logsInMinuteUs = 60000000.0 / logSampleLengthUs;        // how many log samples fits in minute (60`000`000 uS). could be fraction.
+  pulsesPerMinuteLogAvg = unaccountedPulses * logsInMinuteUs;   // average pul/min of log sample
+  lastLogCount = pulsesTemp;                                    // storing where to start next log count from
+  newLogData = 1;                                               // rising flag to process data into log
+}
+
 
 //  〽️  ISR for each sensor pulse
 //do i still need unbuffered calculations now when i have a buffer?

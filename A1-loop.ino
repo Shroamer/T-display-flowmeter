@@ -1,4 +1,5 @@
 void loop() {
+  processLogStore();
   switch (b1_pressStatus) {
     case 0:  // button1 isn't pressed
       break;
@@ -14,7 +15,7 @@ void loop() {
       break;
   }
   b1_pressStatus = 0;
-  
+
   if (newBufferData) {      //We have new buffer calculated, let's process and display it
     newBufferData = false;  // Reset flag
     pageMain();
