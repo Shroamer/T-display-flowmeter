@@ -111,7 +111,6 @@ volatile int64_t b1_pressStartTime = 0;        // store timestamp
 volatile int64_t b1_lastButtonChangeTime = 0;  // store how long button was pressed
 
 void IRAM_ATTR button1ISR() {
-  //Serial.print("bISR:");
   int64_t now = esp_timer_get_time();                              // store isr call timestamp
   if ((now - b1_lastButtonChangeTime) < DEBOUNCE_TIME_US) return;  // Debounce: Ignore any changes that occur faster than DEBOUNCE_TIME_US.
   b1_lastButtonChangeTime = now;
@@ -120,9 +119,7 @@ void IRAM_ATTR button1ISR() {
   if (pressed) {                               // Button has just been pressed: record the timestamp.
     b1_pressStartTime = now;
     b1_pressStatus = 0;
-    //Serial.println("+");
   } else {  // Button released: measure the duration of the press.
-    //Serial.println("-");
     int64_t duration = now - b1_pressStartTime;
     if (duration >= LONG_PRESS_THRESHOLD_US) {
       b1_pressStatus = 2;  // Long press detected.

@@ -19,10 +19,10 @@ https://homeding.github.io/boards/esp32/ttgo-t-display.htm
                    |         |[3v3]|12         13|[5v0]|         | 
                                io0 |BTN _____ BTN| io35
                                         |USB|
-ADC_IN 34     // BATT ADC
-BUTTON1 35
-BUTTON2 0
-ADC Power 14
+ADC_IN      34     // BATT ADC
+BUTTON1     35
+BUTTON2     0
+ADC Power   14
 * input only
 
     ST7789V     ESP32-VSPI
@@ -32,12 +32,26 @@ ADC Power 14
      TFT_DC --> 16
     TFT_RST --> 23 V-RST
      TFT_BL --> 4         // backlight
-
-DS18B20 
- | | |
- 1 2 3
- G D V
- N Q D
- D   D
-
 */
+
+
+/*
+    +-------------+
+    |   T T G O   |
+G   | +---------+ | 3V
+G   | |    D    | | 36
+21  | |    I    | | 37
+22  | |    S    | | 38
+17  | |    P    | | 39
+2   | |    L    | | 32
+15  | |    A    | | 33
+13  | |    Y    | | 25
+12  | |         | | 26
+G   | |         | | 27
+G   | |         | |  G
+3V  | |         | | 5V
+    | +---------+ |
+    |             B-RST
+    | B-2     B-1 |
+    +-----USB-----+
+    */
