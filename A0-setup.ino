@@ -3,6 +3,6 @@ void setup() {
   TFT_init();
   FS_init();
   TFT_welcome();
-  delay(200);
+  delay(1000);
   button_init();
 }

@@ -5,6 +5,6 @@ void FS_init() {
 }
 
 //converts impulses to various volume scales
-unsigned long imp2vol(unsigned long impulses, unsigned long modifier) {
+unsigned long imp2vol(unsigned long impulses, float modifier) {
   return (impulses * modifier);
 }

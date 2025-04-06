@@ -1,5 +1,5 @@
 void pageMain() {
-  
+
   //      DRAWING analog meter arc (0 is down, increments CW)
   int valueAngle = map(pulsesPerMinuteBufAvg, 0, maxPulsePerMinute, 90, 180);  // mapping current value pul/min within min/max sensor values into min/max angle values
   uint32_t analogColor = TFT_CYAN;                                             // Store active analog line color for overflow case
@@ -26,9 +26,7 @@ void pageMain() {
   img.drawFloat(displayLitersPerMinute, 3, 136, 85);  // (value, decimal places, x, y)
 
   //      DRAWING current flow title
-  //img.setTextFont(2);
   img.setTextSize(1);
-  //img.setCursor(105, 64);
   img.setTextColor(TFT_LIGHTGREY);
   img.drawRightString("liters/min", 135, 69, 2);
 
@@ -52,6 +50,32 @@ void pageMain() {
   img.setTextDatum(TL_DATUM);  // Left alignment
   img.setTextFont(1);
   img.drawRect(136, 0, 240 - 136, 135, TFT_DARKGREY);
+}
+
+// welcome screen
+void TFT_welcome() {
+  img.fillRect(0, 0, TFT_HEIGHT, TFT_WIDTH / 2, TFT_CYAN);
+  img.fillRect(0, (TFT_WIDTH / 2), TFT_HEIGHT, TFT_WIDTH / 2, TFT_YELLOW);
+  //drawWedgeLine
+  //img.setTextFont(4);
+  //img.setTextDatum(TC_DATUM);  // top-center alignment
+  img.setTextSize(2);
+  img.setTextColor(TFT_NAVY);
+  img.drawCentreString("FlowMeter", 120, 3, 4);
+  img.setTextSize(1);
+  img.setTextColor(TFT_BROWN);
+  img.drawCentreString("WARNING!", 121, 46, 4);
+  img.setTextColor(TFT_MAROON);
+  img.drawCentreString("WARNING!", 119, 44, 4);
+  img.setTextColor(TFT_GOLD);
+  img.drawCentreString("WARNING!", 120, 45, 4);
+  img.setTextColor(TFT_RED);
+  img.drawCentreString("this software", 120, 70, 2);
+  img.drawCentreString("contains vibeware!", 120, 80, 2);
+  img.drawCentreString("It was written by someone", 120, 90, 2);
+  img.drawCentreString("who has no idea what they're doing", 120, 100, 2);
+  img.drawCentreString("or how any of it works.", 120, 110, 2);
+  printCanvas();
 }
 
 /*void pageOverview() {

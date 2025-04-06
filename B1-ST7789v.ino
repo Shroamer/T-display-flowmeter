@@ -31,14 +31,7 @@ void printCanvas() {
   //img.deleteSprite();                     // Delete it to free memory
 }
 
-void TFT_welcome() {
-  img.fillRect(10, 10, TFT_HEIGHT, 50, TFT_BLUE);
-  img.setTextSize(2);
-  img.setTextColor(TFT_WHITE);
-  img.setCursor(10, 10);
-  img.println("Water Flow Meter");
-  printCanvas();
-}
+
 
 
 /*

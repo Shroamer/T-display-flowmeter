@@ -68,7 +68,7 @@ float maxPulsePerMinute = 1500 * pulPerMl;  //1500 ml/min * pulPerMl to get max 
 // ⏰ batch_timer setup (how often to calculate and log sample)
 unsigned long lastPulseCount = 0;            // last accounted pulse number. All later pulses are to be accounted. Increments inside batch_timer ISR
 hw_timer_t *batch_timer = NULL;              // Timer handle
-unsigned long bufferLengthUs = 500000;       // Alarm time in uS value (500000 - 0.5sec). Chunk of time we will calculate values for.
+unsigned long bufferLengthUs = 250000;       // Alarm time in uS value (500000 - 0.5sec). Chunk of time we will calculate values for.
 volatile unsigned long pulsesToAccount = 0;  // specify how many pulses were accounted. Basically, totalPulses index to determine how many pulses to account in buffer process
 volatile float pulsesPerMinuteBufAvg = 0;    // Here we keep average flow speed in pul/min for last buffer processed
 volatile bool newBufferData = false;         // flag rises in batch_timer ISR to indicate we have new buffer to account to (display and/or store)
@@ -83,7 +83,7 @@ void IRAM_ATTR batchTimer() {
   }
   unsigned long unaccountedPulses = pulsesTemp - lastPulseCount;  // lets determine how many pulses added since latest buffer processing
   float buffersInMinuteUs = 60000000.0 / bufferLengthUs;          // how many buffers fits in minute (60`000`000 uS). could be fraction.
-  pulsesPerMinuteBufAvg = unaccountedPulses * buffersInMinuteUs;  // average pul/min of buffer
+  pulsesPerMinuteBufAvg = buffersInMinuteUs * unaccountedPulses;  // average pul/min of buffer
   lastPulseCount = pulsesTemp;                                    // setting up last unaccounted pulse to current, as we ccounted all of them right now.
   newBufferData = 1;                                              // rising flag to process data further
 }
