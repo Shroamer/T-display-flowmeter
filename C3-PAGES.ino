@@ -14,11 +14,12 @@ void pageMain() {
 
   //      DRAWING current flow value
   float displayLitersPerMinute = (pulsesPerMinuteBufAvg / (pulPerMl * 1000));  // calculating LpM from PpM and PpMl of the sensor
-  img.setTextFont(7);                                                          // 7
+  img.setTextFont(7);
   img.setTextSize(1);
   //img.setCursor(20, 80);
   img.setTextDatum(TR_DATUM);  // Right alignment
-  img.setTextColor(TFT_YELLOW);
+  if (pulsesPerMinuteBufAvg > 0) img.setTextColor(TFT_YELLOW);
+  else img.setTextColor(TFT_LIGHTGREY);
   uint8_t valDecimals = 3;
   if (displayLitersPerMinute >= 1000) valDecimals = 0;
   else if (displayLitersPerMinute >= 100) valDecimals = 1;
@@ -47,9 +48,10 @@ void pageMain() {
   img.drawRightString("liters", 135, 30, 2);
 
 
-  img.setTextDatum(TL_DATUM);  // Left alignment
-  img.setTextFont(1);
-  img.drawRect(136, 0, 240 - 136, 135, TFT_DARKGREY);
+  //img.setTextDatum(TL_DATUM);  // Left alignment
+  //img.setTextFont(1);
+  img.drawRect(136, 0, 104, 135, TFT_DARKGREY);
+  plotLogH(136, 0, 104, 135, 0xFFF4, 0, 0, 0, &img);  // plot horizontal log
 }
 
 // welcome screen

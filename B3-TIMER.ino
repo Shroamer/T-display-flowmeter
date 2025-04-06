@@ -5,9 +5,11 @@ void initTimer(uint64_t alarmTimeUs) {
   timerAlarmWrite(batch_timer, alarmTimeUs, true);  // 500ms (500,000 µs)
   timerAlarmEnable(batch_timer);
 
+  delay(100);  // to async timers
+
   // timer1 setup - sampling for log
   log_timer = timerBegin(1, 80, true);  // Timer 1, prescaler 80 → 1 tick = 1µs
   timerAttachInterrupt(log_timer, &logTimer, true);
-  timerAlarmWrite(log_timer, 1000000, true);  // 1s (1,000,000 µs)
+  timerAlarmWrite(log_timer, logSampleLengthUs, true);  // 1s (1,000,000 µs)
   timerAlarmEnable(log_timer);
 }

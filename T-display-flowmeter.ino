@@ -89,14 +89,14 @@ void IRAM_ATTR batchTimer() {
 }
 
 // logger variables
-float logArray[240] = { NAN };                                      // here we'll store our logged values, initialize array with not-a-number values.
+float logArray[240] = { NAN };                                      // here we'll store our logged values (PpM), initialize array with not-a-number values.
 const int logArrayLength = sizeof(logArray) / sizeof(logArray[0]);  // how many items we have in log array
 int16_t logArrayIndex = logArrayLength - 1;                         // index of last stored to log value. it is the last one, so we can start writing to 0. This way we can pull values circularly and know when the sequence starts. Just because i think shifting whole array each time will be extra resourse consuming. (i'm not a programmer)
 
 // log_timer setup
 unsigned long lastLogCount = 0;             // last accounted in log pulse number. All later pulses are to be accounted for next log entry. Increments inside log_timer ISR
 hw_timer_t *log_timer = NULL;               // Timer handle
-unsigned long logSampleLengthUs = 1000000;  // log sample length in uS value (1000000 - 1sec). Also a timer alarm. Each log entry will be for that chunk length.
+unsigned long logSampleLengthUs = 250000;  // log sample length in uS value (1000000 - 1sec). Also a timer alarm. Each log entry will be for that chunk length.
 volatile float pulsesPerMinuteLogAvg = 0;   // Here we store average flow speed in pul/min for last log sample processed
 volatile bool newLogData = false;           // flag rises in log_timer ISR to indicate we have new log item to account to
 
