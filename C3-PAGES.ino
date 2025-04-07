@@ -50,8 +50,13 @@ void pageMain() {
 
   //img.setTextDatum(TL_DATUM);  // Left alignment
   //img.setTextFont(1);
-  img.drawRect(136, 0, 104, 135, TFT_DARKGREY);
-  plotLogH(136, 0, 104, 135, 0xFFF4, 0, 0, 0, &img);  // plot horizontal log
+  //img.drawRect(136, 0, 104, 135, TFT_DARKGREY); //rectrangle where plot should be
+  //plotLogV(136, 0, 104, 135, 0xFFF4, 0, 0, 1, &img);  // plot top-to-bottom log
+
+  //plotLog(136, 0, 104, 135, 0xFFF4, 0, 0, 1, 0, &img); // plot bottom-to-top log
+  //plotLog(136, 0, 104, 135, 0xFFF4, 0, 0, 1, 1, &img); // plot top-to-bottom log
+  //plotLog(136, 0, 104, 135, 0xFFF4, 0, 0, 0, 0, &img);  // plot right-to-left log
+  plotLog(136, 0, 104, 135, 0xFFF4, 0, 0, 0, 1, &img); // plot left-to-right log
 }
 
 // welcome screen
