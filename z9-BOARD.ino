@@ -19,7 +19,7 @@ https://homeding.github.io/boards/esp32/ttgo-t-display.htm
                    |         |[3v3]|12         13|[5v0]|         | 
                                io0 |BTN _____ BTN| io35
                                         |USB|
-ADC_IN      34     // BATT ADC
+ADC_PIN      34     // BATT ADC
 BUTTON1     35
 BUTTON2     0
 ADC Power   14

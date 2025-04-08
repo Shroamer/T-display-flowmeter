@@ -1,5 +1,8 @@
 void loop() {
-  processLogStore();
+  processLogStore();  // check for new data to update log with
+  checkVBAT();        // update voltage if needed
+
+  //check for BUTTON1 press
   switch (b1_pressStatus) {
     case 0:  // button1 isn't pressed
       break;

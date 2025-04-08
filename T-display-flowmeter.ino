@@ -7,7 +7,8 @@
 #define TFT_BL 4  // backlight
 
 // Other T-Display pin
-#define ADC_IN 34     // BATT ADC
+#define ADC_PIN 34    // BATT ADC connected to battery 1:2 voltage divider (100k/100k)
+#define ADC_EN 14     // ADC_EN is the ADC detection enable port. If the USB port is used for power supply, it is turned on by default. If it is powered by battery, it needs to be set to high level
 #define BUTTON1 35    //
 #define BUTTON2 0     //
 #define ADC_POWER 14  // ???
@@ -25,6 +26,15 @@
 // Peripheral pins
 #define FSENS 13  // water flow sensor input pin
 
+// ================================================
+// === POWER MANAGMENT
+// ================================================
+// https://github.com/Xinyuan-LilyGO/TTGO-T-Display/blob/master/TFT_eSPI/examples/FactoryTest/FactoryTest.ino
+#include <esp_adc_cal.h>
+int vref = 1100;
+volatile int16_t vBatMV = 0;  // storing last battery voltage read
+#define VBAT_PERIOD_MS 5000   // check for vbat voltage every 5000mS (5second)
+uint64_t vBatTimeStamp = 0;   // store timestamp of last vBat check
 
 
 // ================================================
@@ -94,11 +104,11 @@ const int logArrayLength = sizeof(logArray) / sizeof(logArray[0]);  // how many 
 int16_t logArrayIndex = logArrayLength - 1;                         // index of last stored to log value. it is the last one, so we can start writing to 0. This way we can pull values circularly and know when the sequence starts. Just because i think shifting whole array each time will be extra resourse consuming. (i'm not a programmer)
 
 // log_timer setup
-unsigned long lastLogCount = 0;             // last accounted in log pulse number. All later pulses are to be accounted for next log entry. Increments inside log_timer ISR
-hw_timer_t *log_timer = NULL;               // Timer handle
+unsigned long lastLogCount = 0;            // last accounted in log pulse number. All later pulses are to be accounted for next log entry. Increments inside log_timer ISR
+hw_timer_t *log_timer = NULL;              // Timer handle
 unsigned long logSampleLengthUs = 250000;  // log sample length in uS value (1000000 - 1sec). Also a timer alarm. Each log entry will be for that chunk length.
-volatile float pulsesPerMinuteLogAvg = 0;   // Here we store average flow speed in pul/min for last log sample processed
-volatile bool newLogData = false;           // flag rises in log_timer ISR to indicate we have new log item to account to
+volatile float pulsesPerMinuteLogAvg = 0;  // Here we store average flow speed in pul/min for last log sample processed
+volatile bool newLogData = false;          // flag rises in log_timer ISR to indicate we have new log item to account to
 
 // ⏰ log_timer ISR here we about to calculate average pul/min of last log period and iterate lastLogCount index.
 void IRAM_ATTR logTimer() {

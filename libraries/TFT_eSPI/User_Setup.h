@@ -215,7 +215,7 @@
 #define TFT_DC 16
 #define TFT_RST 23
 #define TFT_BL 4
-#define ADC_IN	34
+#define ADC_PIN	34
 #define BUTTON1	35
 #define BUTTON2	0
 #define ADC Power	14
