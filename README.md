@@ -11,6 +11,8 @@ Programed in Arduino IDE for esp32 TTGO T_Display board https://github.com/Xinyu
 * Checks battery voltage (vBat) and displays battery gauge on display.
 * Checks embedded BUTTON1 for short and long presses (i got issues (again))
 
+![08.04.2025 update](https://github.com/Shroamer/T-display-flowmeter/blob/main/photo/IMG_20250408_234426_cr.jpg?raw=true)
+
 ToDo:
 * find out why i have precission issues with conversion to liters/minute. It seems i could get more precise values.
 * find out why my short/long press routine doesn't work as expected
