@@ -7,14 +7,12 @@ void loop() {
     case 0:  // button1 isn't pressed
       break;
     case 1:  // short button1 press
-      //Serial.print("b1:1-");
-      //Serial.println(b1_pressStatus);
+      ESP_LOGD("BTN1", "short: %d", b1_pressStatus);
       break;
     case 2:  // long button1 press - reset user counter
       countPulses = totalPulses;
       newSensorData = true;  // Set flag for new data
-      //Serial.print("b1:2-");
-      //Serial.println(b1_pressStatus);
+      ESP_LOGD("BTN1", "long: %d", b1_pressStatus);
       break;
   }
   b1_pressStatus = 0;

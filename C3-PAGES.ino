@@ -86,33 +86,41 @@ void drawBatGauge(int16_t x, int16_t y, int16_t w, int16_t h, TFT_eSprite *sprit
   if (vBatMV) {
     int availW = w - 2;
     int availH = h - 2;
+    uint16_t chargeColor = TFT_BLACK;                        // color of charge value over battery
     if (vBatMV >= 2500 && vBatMV <= 4200) {                  // normal battery voltage
       int voltageX = map(vBatMV, 2500, 4200, 0 + 1, w - 1);  // find coordinates of current voltage
-      sprite->fillRect(x, y, voltageX, h, TFT_GREEN);
+      uint16_t availColor = TFT_GREEN;                       // color of charge left
+      if (vBatMV < 2900) availColor = TFT_RED;
+      else if (vBatMV < 3700) availColor = TFT_YELLOW;
+      //else availColor = TFT_GREEN;
+      sprite->fillRect(x, y, voltageX, h, availColor);
       sprite->fillRect(x + voltageX, y, w - voltageX, h, TFT_DARKGREEN);
     } else if (vBatMV > 4200) {  // charging
       sprite->fillRect(x, y, w, h, TFT_CYAN);
     } else if (vBatMV < 2500) {  // undervoltage
-      sprite->fillRect(x, y, w, h, TFT_MAROON);
+      sprite->fillRect(x, y, w, h, TFT_GREENYELLOW);
+      chargeColor = TFT_ORANGE;
     }
     //    String voltageStr = String(vBatMV, 1);  // Convert to a String with the chosen precision
     float floatVolts = vBatMV / 1000.0;  // converting to float in volts
     int symbolsFit = availW / 6;         // how many symbols of font1 size2 we can place inside our box (font1:8x6px, 2:18x11, 4:26x16, 6:46x24, 7:58x32, 8:78x48)
-    Serial.print("availW==");
-    Serial.println(availW);
+    //ESP_LOGD("availW==", "%d", availW);
     if (symbolsFit >= 3) {             // if we have where to place 3+ letters (3.6)
       sprite->setTextDatum(CC_DATUM);  // center text
       sprite->setTextFont(1);
       sprite->setTextSize(1);
-      sprite->setTextColor(TFT_BLACK);
+      sprite->setTextColor(chargeColor);
       int decimalsPlot = symbolsFit - 2;       // substracting 2 symbols : "3." to get how many space left for decimals
       if (decimalsPlot > 3) decimalsPlot = 3;  // we don't need more than 3 decimals
-      Serial.print("decimalsPlot==");
-      Serial.println(decimalsPlot);
+      //ESP_LOGD("decimalsPlot==", "%d", decimalsPlot);
       sprite->drawFloat(floatVolts, decimalsPlot, x + (availW / 2), y + (availH / 2), 1);
+      //sprite->setTextColor(TFT_WHITE); sprite->drawNumber(vBatMV, x + (availW / 2), y + h + (availH / 2), 1); //for debug purposes
     }
   }
-  sprite->drawRect(x, y, w, h, TFT_LIGHTGREY);  // draw frame
+  // draw frame
+  sprite->drawRect(x, y, w, h, TFT_LIGHTGREY);
+  sprite->drawFastVLine(x + w - 1, y, h / 3, TFT_BLACK);
+  sprite->drawFastVLine(x + w - 1, y + (2 * (h / 3)), h / 3, TFT_BLACK);
 }
 
 /*void pageOverview() {

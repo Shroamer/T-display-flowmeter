@@ -12,6 +12,7 @@ Programed in Arduino IDE for esp32 TTGO T_Display board https://github.com/Xinyu
 * Checks embedded BUTTON1 for short and long presses (i got issues (again))
 
 ToDo:
+* add power-off triggered by low battery voltage
 * find out why i have precission issues with conversion to liters/minute. It seems i could get more precise values.
 * find out why my short/long press routine doesn't work as expected
 * add debug page

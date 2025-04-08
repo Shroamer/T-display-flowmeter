@@ -33,7 +33,7 @@
 #include <esp_adc_cal.h>
 int vref = 1100;
 volatile int16_t vBatMV = 0;  // storing last battery voltage read
-#define VBAT_PERIOD_MS 5000   // check for vbat voltage every 5000mS (5second)
+#define VBAT_PERIOD_MS 1000   // check for vbat voltage every 5000mS (5second)
 uint64_t vBatTimeStamp = 0;   // store timestamp of last vBat check
 
 
