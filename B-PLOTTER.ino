@@ -231,6 +231,5 @@ void plotLogV(int16_t x, int16_t y, int16_t w, int16_t h, uint32_t color, float 
       //sprite->drawWideLine(x + ix, (y + h) - plotArray[ix - 1], x + ix + 1, (y + h) - plotArray[ix], 2, color, color);
     }
    */
-}
-*/
+
 

@@ -54,9 +54,9 @@ void pageMain() {
   //plotLogV(136, 0, 104, 135, 0xFFF4, 0, 0, 1, &img);  // plot top-to-bottom log
 
   //plotLog(136, 0, 104, 135, 0xFFF4, 0, 0, 1, 0, &img); // plot bottom-to-top log
-  //plotLog(136, 0, 104, 135, 0xFFF4, 0, 0, 1, 1, &img); // plot top-to-bottom log
+  plotLog(136, 0, 104, 135, 0xFFF4, 0, 0, 1, 1, &img); // plot top-to-bottom log
   //plotLog(136, 0, 104, 135, 0xFFF4, 0, 0, 0, 0, &img);  // plot right-to-left log
-  plotLog(136, 0, 104, 135, 0xFFF4, 0, 0, 0, 1, &img); // plot left-to-right log
+  //plotLog(136, 0, 104, 135, 0xFFF4, 0, 0, 0, 1, &img); // plot left-to-right log
 }
 
 // welcome screen
