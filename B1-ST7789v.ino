@@ -1,12 +1,29 @@
-// Backlight control; 1 = on; 2 = off;
-void TFT_BackLight(bool state) {
+// Backlight control; 1 = on; 0 = off;
+void setBacklight(bool state) {
   digitalWrite(TFT_BL, state ? HIGH : LOW);
 }
+// Backlight state; 1 = on; 0 = off;
+bool getBacklight() {
+  return (digitalRead(TFT_BL));
+}
+
+// turns st7789 into sleep mode about 10 µA comparing to 2-5mA in working mode.
+void displaySleep() {
+  tft.writecommand(ST7789_SLPIN);  // Sleep in
+  delay(120);                      // Required delay after sleep command
+}
+
+// wakes up st7789 from sleep mode
+void displayWake() {
+  tft.writecommand(ST7789_SLPOUT);  // Sleep out
+  delay(120);                       // Required delay after wake command
+}
+
 
 // display init routine
 void TFT_init() {
   pinMode(TFT_BL, OUTPUT);  // TTGO T-Display enable Backlight pin 4
-  TFT_BackLight(1);         // T-Display turn on Backlight
+  setBacklight(1);          // T-Display turn on Backlight
   tft.init();               // eSPI variant
   tft.setRotation(3);
   tft.fillScreen(TFT_BLACK);

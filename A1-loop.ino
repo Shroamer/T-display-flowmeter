@@ -13,7 +13,8 @@ void loop() {
   switch (b1_statLoop) {
     case 0:  // button1 isn't pressed
       break;
-    case 1:  // short button1 press
+    case 1:  // short button1 press - switch TFT backlight
+      setBacklight(!getBacklight());
       ESP_LOGD("BTN1", "short: %d", b1_statLoop);
       break;
     case 2:  // long button1 press - reset user counter

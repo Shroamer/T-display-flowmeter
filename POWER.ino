@@ -12,9 +12,9 @@ void checkVBAT() {
 // return integer voltage in milivolts
 int16_t getVoltageMV() {
   vBatPower(1);  // powers up voltage divider (shouldn't we wait for it to ramp up?)
-  delay(3); //weird, previously we have no need to wait here for normal value, but now i'm getting 1.2v on battery w/o this delay
+  delay(3);      //weird, previously we have no need to wait here for normal value, but now i'm getting 1.2v on battery w/o this delay
   uint16_t v = analogRead(ADC_PIN);
-  vBatPower(0);                                                  // powers down voltage divider for battery saving
+  vBatPower(0);                                                                                      // powers down voltage divider for battery saving
   int16_t battery_voltage_mv = (int16_t)(((float)v / 4095.0) * 2.0 * 3.3 * (vref / 1000.0) * 1000);  // find out voltage in integer milivolts (chatgpt)
   //float battery_voltage = ((float)v / 4095.0) * 2.0 * 3.3 * (vref / 1000.0); // find out voltage in float volts (original)
   //img.drawNumber(v, 30, 30, 1);
@@ -44,4 +44,28 @@ void vBat_init() {
   }
   //vBatMV = getVoltageMV();  // get initial voltage so not to wait 5 sec to update
   vBatPower(0);  //digitalWrite(ADC_EN, LOW);  // powers down voltage divider
+}
+
+// Put esp32 into Light Sleep ~0.8 mA: CPU paused, RAM retained, Peripherals off, Timer or GPIO wakeup possible.
+void enterLightSleep() {
+  // Setup GPIO wake sources
+  esp_sleep_enable_ext1_wakeup(
+    (1ULL << FSENS) | (1ULL << BUTTON1) | (1ULL << BUTTON2),
+    ESP_EXT1_WAKEUP_ANY_HIGH  // Wake on any HIGH signal
+  );
+  //Serial.println("Going to light sleep");
+  delay(100);  // Let serial print before sleep
+  esp_light_sleep_start();
+  //Serial.println("Woke up from light sleep");
+}
+
+// Put esp32 into Deep Sleep ~10–150 µA: CPU off, RAM lost (unless RTC slow mem used), Only RTC and ULP core can stay running. Wakeup by timer, GPIO, touch, etc.
+void enterDeepSleep() {
+  // Setup GPIO wake sources
+  esp_sleep_enable_ext1_wakeup(
+    (1ULL << FSENS) | (1ULL << BUTTON1) | (1ULL << BUTTON2),
+    ESP_EXT1_WAKEUP_ANY_HIGH);
+  //Serial.println("Going to deep sleep");
+  delay(100);
+  esp_deep_sleep_start();  // Never returns unless reset
 }
