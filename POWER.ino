@@ -18,7 +18,7 @@ int16_t getVoltageMV() {
   int16_t battery_voltage_mv = (int16_t)(((float)v / 4095.0) * 2.0 * 3.3 * (vref / 1000.0) * 1000);  // find out voltage in integer milivolts (chatgpt)
   //float battery_voltage = ((float)v / 4095.0) * 2.0 * 3.3 * (vref / 1000.0); // find out voltage in float volts (original)
   //img.drawNumber(v, 30, 30, 1);
-  ESP_LOGD("Voltage/RAW:", "%d mV, %d", battery_voltage_mv, v);  //ESP_LOGD("Flow", "Pulse count: %d", pulseCount);
+  //ESP_LOGD("Voltage/RAW:", "%d mV, %d", battery_voltage_mv, v);  //ESP_LOGD("Flow", "Pulse count: %d", pulseCount);
   return (battery_voltage_mv);
 }
 
@@ -35,15 +35,12 @@ void vBat_init() {
   esp_adc_cal_characteristics_t adc_chars;
   esp_adc_cal_value_t val_type = esp_adc_cal_characterize(ADC_UNIT_1, ADC_ATTEN_DB_11, ADC_WIDTH_BIT_12, 1100, &adc_chars);  //Check type of calibration value used to characterize ADC
   if (val_type == ESP_ADC_CAL_VAL_EFUSE_VREF) {
-    ESP_LOGD("eFuse Vref:", "%u mV", adc_chars.vref);
-    //Serial.printf("eFuse Vref:%u mV", adc_chars.vref);
+    ESP_LOGI("eFuse Vref:", "%u mV", adc_chars.vref);
     vref = adc_chars.vref;
   } else if (val_type == ESP_ADC_CAL_VAL_EFUSE_TP) {
-    ESP_LOGD("Two Point --> coeff_a:", "%umV coeff_b:%umV\n", adc_chars.coeff_a, adc_chars.coeff_b);
-    //Serial.printf("Two Point --> coeff_a:%umV coeff_b:%umV\n", adc_chars.coeff_a, adc_chars.coeff_b);
+    ESP_LOGI("Two Point --> coeff_a:", "%umV coeff_b:%umV\n", adc_chars.coeff_a, adc_chars.coeff_b);
   } else {
-    ESP_LOGD("Default Vref:", "1100mV");
-    //Serial.println("Default Vref: 1100mV");
+    ESP_LOGI("Default Vref:", "1100mV");
   }
   //vBatMV = getVoltageMV();  // get initial voltage so not to wait 5 sec to update
   vBatPower(0);  //digitalWrite(ADC_EN, LOW);  // powers down voltage divider

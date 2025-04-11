@@ -142,14 +142,14 @@ void IRAM_ATTR pulseISR() {
 }
 
 //  🔘  ISR for pressing BUTTON1 (GPIO35)
-#define DEBOUNCE_TIME_US 50000                 // 50 ms debounce threshold (in microseconds)
-#define LONG_PRESS_THRESHOLD_US 500000         // 0.5 second threshold for a long press
-volatile int8_t b1_pressStatus = 0;            // 0 - unpressed; 1 - short-pressed; 2 - long pressed
-volatile int64_t b1_pressStartTime = 0;        // store timestamp
-volatile int64_t b1_lastButtonChangeTime = 0;  // store how long button was pressed
+#define DEBOUNCE_TIME_US 10000                 // 50 ms debounce threshold (in microseconds)
+#define LONG_PRESS_THRESHOLD_US 500000         // 1 second threshold for a long press
+volatile int16_t b1_pressStatus = 0;            // 0 - unpressed; 1 - short-pressed; 2 - long pressed
+volatile uint64_t b1_pressStartTime = 0;        // store timestamp
+volatile uint64_t b1_lastButtonChangeTime = 0;  // store how long button was pressed
 
 void IRAM_ATTR button1ISR() {
-  int64_t now = esp_timer_get_time();                              // store isr call timestamp
+  uint64_t now = esp_timer_get_time();                              // store isr call timestamp
   if ((now - b1_lastButtonChangeTime) < DEBOUNCE_TIME_US) return;  // Debounce: Ignore any changes that occur faster than DEBOUNCE_TIME_US.
   b1_lastButtonChangeTime = now;
 
@@ -158,7 +158,7 @@ void IRAM_ATTR button1ISR() {
     b1_pressStartTime = now;
     b1_pressStatus = 0;
   } else {  // Button released: measure the duration of the press.
-    int64_t duration = now - b1_pressStartTime;
+    uint64_t duration = now - b1_pressStartTime;
     if (duration >= LONG_PRESS_THRESHOLD_US) {
       b1_pressStatus = 2;  // Long press detected.
     } else {
